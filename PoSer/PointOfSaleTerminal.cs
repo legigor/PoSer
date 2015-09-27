@@ -55,18 +55,29 @@ namespace PoSer
                     .Union(new[] { new VolumePrice(price, 1) })
                     .OrderBy(price => price.PriceForUnit);
 
-                decimal total = 0;
-                var v = volume;
+                var seed = new AccumulatorRecord { Total = 0m, Volume = volume };
 
-                foreach (var wp in weightedPrices)
-                {
-                    var groups = v / wp.Volume;
+                var res = weightedPrices.Aggregate(
+                    seed, 
+                    (acc, wp) =>
+                    {
+                        var groups = acc.Volume / wp.Volume;
 
-                    total += wp.PriceForVolume * groups;
-                    v = v - wp.Volume * groups;
-                }
+                        var total = acc.Total + wp.PriceForVolume * groups;
+                        var newVolume = acc.Volume - wp.Volume * groups;
+                    
+                        return new AccumulatorRecord { Total = total, Volume = newVolume };
+                    }, 
+                    x => x.Total
+                );
 
-                return total;
+                return res;
+            }
+
+            class AccumulatorRecord // Kind of a tuple like record type
+            {
+                public decimal Total;
+                public int Volume;
             }
         }
 
