@@ -35,10 +35,38 @@ namespace PoSer
         [TestCase("CCCCCCC",       Result = 6.00)]
         [TestCase("ABCD",          Result = 7.25)]
         [TestCase("EEEEEEEEEEE",   Result = 10.50)]
-        public decimal When_scanning(string codes)
+        public decimal When_calculating_voume_discount(string codes)
         {
             pos.Scan(codes.Select(c => c.ToString()).ToArray());
-            return pos.CalculateTotal();
+            return pos.CalculateTotal().Gross;
+        }
+
+        [TestCase("",              Result = 0.00)]
+        [TestCase("B",             Result = 4.25)]
+        [TestCase("BB",            Result = 8.50)]
+        [TestCase("ABCDABA",       Result = 14.00)]
+        [TestCase("CCCCCCC",       Result = 7.00)]
+        [TestCase("ABCD",          Result = 7.25)]
+        [TestCase("EEEEEEEEEEE",   Result = 13.75)]
+        public decimal When_calculating_net_for_saving_to_the_customers_ballance(string codes)
+        {
+            pos.Scan(codes.Select(c => c.ToString()).ToArray());
+            return pos.CalculateTotal().Net;
+        }
+
+        [TestCase("",              Result = 0.00)]
+        [TestCase("B",             Result = 4.04)]
+        [TestCase("BB",            Result = 8.08)]
+        [TestCase("ABCDABA",       Result = 12.74)]
+        [TestCase("CCCCCCC",       Result = 6.00)]
+        [TestCase("ABCD",          Result = 6.89)]
+        [TestCase("EEEEEEEEEEE",   Result = 10.50)]
+        public decimal When_calculating_total_discount(string codes)
+        {
+            pos.Scan(codes.Select(c => c.ToString()).ToArray());
+            pos.SetTotalDiscount(0.05);
+
+            return pos.CalculateTotal().Gross;
         }
     }
 }

@@ -7,8 +7,8 @@ namespace PoSer
     public class PointOfSaleTerminal
     {
         readonly IDictionary<string, ItemTotalCalculator> calculators = new Dictionary<string, ItemTotalCalculator>();
-
         readonly IList<string> items = new List<string>();
+        double discount;
 
         public void SetPricing(string code, decimal price, params VolumePrice[] volumePrices)
         {
@@ -26,16 +26,32 @@ namespace PoSer
             Array.ForEach(codes, items.Add);
         }
 
-        public decimal CalculateTotal()
+        public Total CalculateTotal()
         {
-            var total = items.Distinct().Sum(code =>
+            var totals = items.Distinct().Select(code =>
             {
                 var calculator = calculators[code];
                 var volume = items.Count(c => c == code);
 
-                return calculator.CalculateTotal(volume);
+                var applyDiscount = calculator
+                    .CalculateTotal(volume);
+                return ApplyDiscountIfNothingAppliedYet(applyDiscount, discount);
             });
-            return total;
+            return totals.Aggregate(new Total(0, 0), (acc, total) => new Total(acc.Net + total.Net, acc.Gross + total.Gross));
+        }
+
+        static Total ApplyDiscountIfNothingAppliedYet(Total total, double discount)
+        {
+            var adjustedGross = total.Gross != total.Net
+                                ? total.Gross
+                                : total.Net - total.Net * (decimal)discount;
+
+            return new Total(total.Net, Math.Round(adjustedGross, 2));
+        }
+
+        public void SetTotalDiscount(double discount)
+        {
+            this.discount = discount;
         }
 
         class ItemTotalCalculator
@@ -49,7 +65,7 @@ namespace PoSer
                 this.volumePrices = volumePrices;
             }
 
-            public decimal CalculateTotal(int volume)
+            public Total CalculateTotal(int volume)
             {
                 var weightedPrices = volumePrices
                     .Union(new[] { new VolumePrice(price, 1) })
@@ -57,7 +73,7 @@ namespace PoSer
 
                 var seed = new AccumulatorRecord { Total = 0m, Volume = volume };
 
-                var res = weightedPrices.Aggregate(
+                var gross = weightedPrices.Aggregate(
                     seed, 
                     (acc, wp) =>
                     {
@@ -71,7 +87,7 @@ namespace PoSer
                     x => x.Total
                 );
 
-                return res;
+                return new Total(volume * price, gross); ;
             }
 
             class AccumulatorRecord // Kind of a tuple like record type
