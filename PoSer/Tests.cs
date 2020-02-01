@@ -28,39 +28,39 @@ namespace PoSer
             Assert.Throws<InvalidOperationException>(() => pos.Scan("ABCDEZ"));
         }
 
-        [TestCase("",              Result = 0.00)]
-        [TestCase("B",             Result = 4.25)]
-        [TestCase("BB",            Result = 8.50)]
-        [TestCase("ABCDABA",       Result = 13.25)]
-        [TestCase("CCCCCCC",       Result = 6.00)]
-        [TestCase("ABCD",          Result = 7.25)]
-        [TestCase("EEEEEEEEEEE",   Result = 10.50)]
+        [TestCase("",              ExpectedResult = 0.00)]
+        [TestCase("B",             ExpectedResult = 4.25)]
+        [TestCase("BB",            ExpectedResult = 8.50)]
+        [TestCase("ABCDABA",       ExpectedResult = 13.25)]
+        [TestCase("CCCCCCC",       ExpectedResult = 6.00)]
+        [TestCase("ABCD",          ExpectedResult = 7.25)]
+        [TestCase("EEEEEEEEEEE",   ExpectedResult = 10.50)]
         public decimal When_calculating_voume_discount(string codes)
         {
             pos.Scan(codes.Select(c => c.ToString()).ToArray());
             return pos.CalculateTotal().Gross;
         }
 
-        [TestCase("",              Result = 0.00)]
-        [TestCase("B",             Result = 4.25)]
-        [TestCase("BB",            Result = 8.50)]
-        [TestCase("ABCDABA",       Result = 14.00)]
-        [TestCase("CCCCCCC",       Result = 7.00)]
-        [TestCase("ABCD",          Result = 7.25)]
-        [TestCase("EEEEEEEEEEE",   Result = 13.75)]
+        [TestCase("",              ExpectedResult = 0.00)]
+        [TestCase("B",             ExpectedResult = 4.25)]
+        [TestCase("BB",            ExpectedResult = 8.50)]
+        [TestCase("ABCDABA",       ExpectedResult = 14.00)]
+        [TestCase("CCCCCCC",       ExpectedResult = 7.00)]
+        [TestCase("ABCD",          ExpectedResult = 7.25)]
+        [TestCase("EEEEEEEEEEE",   ExpectedResult = 13.75)]
         public decimal When_calculating_net_for_saving_to_the_customers_ballance(string codes)
         {
             pos.Scan(codes.Select(c => c.ToString()).ToArray());
             return pos.CalculateTotal().Net;
         }
 
-        [TestCase("",              Result = 0.00)]
-        [TestCase("B",             Result = 4.04)]
-        [TestCase("BB",            Result = 8.08)]
-        [TestCase("ABCDABA",       Result = 12.74)]
-        [TestCase("CCCCCCC",       Result = 6.00)]
-        [TestCase("ABCD",          Result = 6.89)]
-        [TestCase("EEEEEEEEEEE",   Result = 10.50)]
+        [TestCase("",              ExpectedResult = 0.00)]
+        [TestCase("B",             ExpectedResult = 4.04)]
+        [TestCase("BB",            ExpectedResult = 8.08)]
+        [TestCase("ABCDABA",       ExpectedResult = 12.74)]
+        [TestCase("CCCCCCC",       ExpectedResult = 6.00)]
+        [TestCase("ABCD",          ExpectedResult = 6.89)]
+        [TestCase("EEEEEEEEEEE",   ExpectedResult = 10.50)]
         public decimal When_calculating_total_discount(string codes)
         {
             pos.Scan(codes.Select(c => c.ToString()).ToArray());
